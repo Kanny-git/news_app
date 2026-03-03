@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface CategoryBarProps {
     activeCategory: string;
@@ -19,19 +20,30 @@ const categories = [
 
 export default function CategoryBar({ activeCategory, onCategoryChange }: CategoryBarProps) {
     return (
-        <div className="flex flex-wrap items-center justify-center gap-2 py-6 border-b border-gray-100 mb-8 sticky top-0 bg-white/80 backdrop-blur-md z-10">
-            {categories.map((category) => (
-                <button
-                    key={category.id}
-                    onClick={() => onCategoryChange(category.id)}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 ${activeCategory === category.id
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105 active:scale-95'
-                        }`}
-                >
-                    {category.label}
-                </button>
-            ))}
+        <div className="flex flex-wrap items-center justify-center gap-3 py-4">
+            {categories.map((category) => {
+                const isActive = activeCategory === category.id;
+
+                return (
+                    <button
+                        key={category.id}
+                        onClick={() => onCategoryChange(category.id)}
+                        className={`relative px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${isActive
+                                ? 'text-white'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                            }`}
+                    >
+                        {isActive && (
+                            <motion.div
+                                layoutId="activeCategory"
+                                className="absolute inset-0 bg-primary rounded-full shadow-lg shadow-primary/20"
+                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                        )}
+                        <span className="relative z-10">{category.label}</span>
+                    </button>
+                );
+            })}
         </div>
     );
 }

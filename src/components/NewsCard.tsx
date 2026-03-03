@@ -1,33 +1,52 @@
+'use client';
+
 import { Article } from '../types';
 import { useFavorites } from '../context/FavoritesContext';
+import { motion } from 'framer-motion';
+import { Heart, ExternalLink, Clock } from 'lucide-react';
 
 interface NewsCardProps {
     article: Article;
+    index?: number;
 }
 
-export default function NewsCard({ article }: NewsCardProps) {
+export default function NewsCard({ article, index = 0 }: NewsCardProps) {
     const { toggleFavorite, isFavorite } = useFavorites();
     const active = isFavorite(article.url);
 
     return (
-        <article className="group bg-white rounded-2xl overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-100 hover:-translate-y-1 flex flex-col h-full relative">
-            <div className="relative aspect-video overflow-hidden">
-                {article.image ? (
-                    <img
-                        src={article.image}
-                        alt={article.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400 text-sm">画像がありません</span>
+        <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="group bg-card rounded-2xl overflow-hidden border border-border transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 flex flex-col h-full relative"
+        >
+            <div className="relative aspect-[16/10] overflow-hidden">
+                <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full h-full group/image"
+                >
+                    {article.image ? (
+                        <img
+                            src={article.image}
+                            alt={article.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover/image:scale-110"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                            <span className="text-muted-foreground text-sm font-medium">画像がありません</span>
+                        </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300" />
+
+                    <div className="absolute top-4 left-4 flex gap-2">
+                        <span className="px-3 py-1 bg-white/90 dark:bg-black/90 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm border border-white/20">
+                            {article.source.name}
+                        </span>
                     </div>
-                )}
-                <div className="absolute top-4 left-4 flex gap-2">
-                    <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-[10px] font-bold uppercase tracking-wider text-blue-600 shadow-sm">
-                        {article.source.name}
-                    </span>
-                </div>
+                </a>
 
                 <button
                     onClick={(e) => {
@@ -35,37 +54,33 @@ export default function NewsCard({ article }: NewsCardProps) {
                         e.stopPropagation();
                         toggleFavorite(article);
                     }}
-                    className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 ${active
+                    className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-20 ${active
                         ? 'bg-red-500 text-white shadow-lg shadow-red-200 scale-110'
-                        : 'bg-white/80 text-gray-400 hover:bg-white hover:text-red-500 hover:scale-110'
+                        : 'bg-white/80 dark:bg-black/80 text-gray-400 hover:bg-white dark:hover:bg-black hover:text-red-500 hover:scale-110 border border-white/20'
                         }`}
                 >
-                    <svg
-                        className={`w-5 h-5 ${active ? 'fill-current' : 'fill-none'}`}
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                    </svg>
+                    <Heart className={`w-4 h-4 ${active ? 'fill-current' : ''}`} />
                 </button>
             </div>
 
             <div className="p-6 flex flex-col flex-1">
-                <h3 className="text-lg font-bold leading-tight mb-2 text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
+                    <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        5 min read
+                    </span>
+                </div>
+
+                <h3 className="text-lg font-bold leading-tight mb-3 text-card-foreground group-hover:text-primary transition-colors line-clamp-2">
                     {article.title}
                 </h3>
 
-                <p className="text-gray-600 text-sm mb-6 line-clamp-3">
+                <p className="text-muted-foreground text-sm mb-6 line-clamp-3 leading-relaxed">
                     {article.description}
                 </p>
 
-                <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
-                    <time className="text-[11px] text-gray-400 font-medium">
+                <div className="mt-auto flex items-center justify-between pt-4 border-t border-border">
+                    <time className="text-[11px] text-muted-foreground font-semibold">
                         {new Date(article.publishedAt).toLocaleDateString('ja-JP', {
                             year: 'numeric',
                             month: 'long',
@@ -76,20 +91,13 @@ export default function NewsCard({ article }: NewsCardProps) {
                         href={article.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-bold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 group/link"
+                        className="text-sm font-bold text-primary hover:text-accent inline-flex items-center gap-1.5 group/link"
                     >
-                        もっと見る
-                        <svg
-                            className="w-4 h-4 transition-transform group-hover/link:translate-x-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
+                        続きを読む
+                        <ExternalLink className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
                     </a>
                 </div>
             </div>
-        </article>
+        </motion.article>
     );
 }
